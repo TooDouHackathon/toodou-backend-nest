@@ -1,0 +1,49 @@
+# docker-compose.yml
+version: '3'
+
+volumes:
+  toodou-backend-dev-postgres:
+  toodou-backend-dev-cache:
+    driver: local
+
+networks:
+  toodou:
+    driver: bridge
+
+services:
+  cache:
+    image: redis:latest
+    container_name: toodou-cache
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${redis_password}
+    volumes:
+      - toodou-backend-dev-cache:/data
+
+  postgres:
+    image: postgis/postgis:14-3.3
+    container_name: toodou-postgres
+    environment:
+      POSTGRES_USER: ${postgres_user}
+      POSTGRES_PASSWORD: ${postgres_password}
+      APP_DB_NAME: ${postgres_database}
+      PGDATA: /data/postgres
+    volumes:
+      - ./entrypoint:/docker-entrypoint-initdb.d/
+      - ./seeding:/home
+      - toodou-backend-dev-postgres:/data/postgres
+    ports:
+      - '${postgres_port}:5432'
+    networks:
+      - toodou
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: toodou-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${pgadmin_user}@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: ${pgadmin_password}
+    ports:
+      - '${pgadmin_port}:80'
+    networks:
+      - toodou
