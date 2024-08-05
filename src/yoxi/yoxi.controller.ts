@@ -1,34 +1,30 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { YoxiService } from './yoxi.service';
-import { CreateYoxiDto } from './dto/create-yoxi.dto';
-import { UpdateYoxiDto } from './dto/update-yoxi.dto';
+import {
+  Controller,
+  Get,
+  Query,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common'
+import { YoxiService } from './yoxi.service'
+import { CreateYoxiDto } from './dto/create-yoxi.dto'
+import { UpdateYoxiDto } from './dto/update-yoxi.dto'
 
 @Controller('yoxi')
 export class YoxiController {
   constructor(private readonly yoxiService: YoxiService) {}
 
-  @Post()
-  create(@Body() createYoxiDto: CreateYoxiDto) {
-    return this.yoxiService.create(createYoxiDto);
+  @Get('riders')
+  async findAllRiders(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ) {
+    return await this.yoxiService.findAllRiders({ page, limit })
   }
 
-  @Get()
-  findAll() {
-    return this.yoxiService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.yoxiService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateYoxiDto: UpdateYoxiDto) {
-    return this.yoxiService.update(+id, updateYoxiDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.yoxiService.remove(+id);
+  @Get('rider/:riderId/orders')
+  async findOrdersByRiderId(@Param('riderId') riderId: string) {
+    return await this.yoxiService.findOrdersByRiderId(riderId)
   }
 }
